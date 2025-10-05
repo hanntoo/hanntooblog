@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use Illuminate\Validation\Rule;
 
 class PostDashboardController extends Controller
 {
@@ -97,9 +97,14 @@ class PostDashboardController extends Controller
     public function update(Request $request, Post $post)
     {
         $request->validate([
-            'title' => 'required|min:4|max:255|unique:posts,title' . $post->id,
+            'title' => [
+                'required',
+                'min:4',
+                'max:255',
+                Rule::unique('posts', 'title')->ignore($post->id),
+            ],
             'category_id' => 'required',
-            'body' => 'required'
+            'body' => 'required',
         ]);
 
 

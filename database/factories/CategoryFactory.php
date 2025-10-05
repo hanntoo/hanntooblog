@@ -20,7 +20,14 @@ class CategoryFactory extends Factory
         $category_name = fake()->sentence(rand(1,3), false);
         return [
             'name' => $category_name,
-            'slug' => Str::slug($category_name)
+            'slug' => Str::slug($category_name),
+            'color' => fake()->randomElement([
+                'bg-red-100',
+                'bg-green-100',
+                'bg-blue-100',
+                'bg-yellow-100',
+                'bg-purple-100',
+            ]),
         ];
     }
 }

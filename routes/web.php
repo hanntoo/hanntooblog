@@ -26,22 +26,30 @@ Route::get('/posts', function () {
 });
 
 Route::get('/authors/{user:username}', function (User $user) {
-    // $posts = $user->posts->load(['author', 'category']);
+    $posts = Post::latest()
+        ->where('author_id', $user->id)
+        ->with(['author', 'category'])
+        ->paginate(6)
+        ->withQueryString();
 
     return view('posts', [
         'title' => 'Blog Page',
-        'heading' => count($user->posts) . ' Article by. ' . $user->name,
-        'posts' => $user->posts
+        'heading' => $posts->total() . ' Article by. ' . $user->name,
+        'posts' => $posts,
     ]);
 });
 
 Route::get('/categories/{category:slug}', function (Category $category) {
-    // $posts = $category->posts->load(['author', 'category']);
+    $posts = Post::latest()
+        ->where('category_id', $category->id)
+        ->with(['author', 'category'])
+        ->paginate(6)
+        ->withQueryString();
 
     return view('posts', [
         'title' => 'Blog Page',
         'heading' => 'Category: ' . $category->name,
-        'posts' => $category->posts
+        'posts' => $posts,
     ]);
 });
 

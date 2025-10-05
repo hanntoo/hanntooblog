@@ -28,12 +28,11 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        // $request->user()->fill($request->validated());
-
         $validated = $request->validated();
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if (isset($validated['email']) && $validated['email'] !== $user->email) {
+            $user->email_verified_at = null;
         }
 
         // if ($request->hasFile('avatar')) {
@@ -45,8 +44,8 @@ class ProfileController extends Controller
         // }
 
         if ($request->avatar) {
-            if (!empty($request->user()->avatar)) {
-                Storage::disk('public')->delete($request->user()->avatar);
+            if (!empty($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
             }
 
             $newFileName = Str::after($request->avatar, 'tmp/');
@@ -56,8 +55,7 @@ class ProfileController extends Controller
             $validated['avatar'] = "img/$newFileName";
         }
 
-        // $request->user()->save();
-        $request->user()->update($validated);
+        $user->update($validated);
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -65,11 +63,15 @@ class ProfileController extends Controller
 
     public function upload(Request $request)
     {
-        if ($request->hasFile('avatar')) {
-            $img_path = $request->file('avatar')->store('tmp', 'public');
-        }
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:10240'],
+        ]);
 
-        return $img_path;
+        $imgPath = $request->file('avatar')->store('tmp', 'public');
+
+        return response()->json([
+            'path' => $imgPath,
+        ]);
     }
 
     /**
